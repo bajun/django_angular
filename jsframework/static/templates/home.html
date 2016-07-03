@@ -1,0 +1,40 @@
+<div class="jumbotron">
+	<div class="profile-heading" ng-show="key || user.username">
+		<h3>
+	  		<span class="label label-success" id="username-label">Logged as {{user.username}}</span>
+		</h3>
+	  <input type="submit" class="btn btn-lg btn-primary" ng-click="logout()" value="Logout?"/>
+	</div>
+	<div ng-hide="key">
+	  <form id="id_auth_form" class="" ng-submit="login()">
+	  <div class="form-group">
+	    <input ng-model="username" required name="username" type="text" placeholder="username" class="form-control">
+	  </div>
+	  <div class="form-group">
+	    <input ng-model="password" required name="password" type="password" placeholder="password" class="form-control">
+	  </div>
+	    <div class="btn-group">
+	    <input type="submit" class="btn btn-default" value="login">
+	  </div>
+	  </form>
+	</div>
+</div>
+<div class="well well-lg">
+	<p>Please notice, that it's test app, and there is no logic, in the common meaning.</p>
+	<small>* - links for actions</small>
+	<ol>
+		<li> Home page - login </li>
+		<li> Profile
+			<ol>
+				<li>List your profile fields</li>
+				<li>List all users with CRUD (staff only)*</li> 
+				<li>List all posts with CRUD (staff only)*</li>
+			</ol>
+		</li>
+		<li>Posts 
+			<ol>
+				<li>List all your posts </li>
+				<li>Add post (title + content)</li>
+			</ol>
+	</ol>
+</div>

@@ -1,0 +1,34 @@
+<div class="panel panel-default">
+	<div class="add-post-form">
+		<form class="form-horizontal" ng-submit="addPost()" name="postForm">
+			<div class="page-header">
+			  <h2>Post something</h2>
+			  <div class="alert alert-success" style="display:none;" role="alert">Your post published!</div>
+			</div>
+			<div class="form-group">
+				<label for="inputTitle" class="col-sm-2 control-label">Title</label>
+				<div class="col-sm-10">
+					<input type="text" class="form-control" ng-model="title" placeholder="Title" id="inputTitle">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="inputContent" class="col-sm-2 control-label">Content</label>
+				<div class="col-sm-10">
+					<text-angular ng-model="content"></text-angular>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-default">Publish</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="panel-heading">User posts</div>
+	<div class="list-group">
+	  	<a ui-sref="singlepost({id:{{post.id}}})" class="list-group-item" ng-repeat="post in posts | filter : postAuthorFilter">
+			<h4 class="list-group-item-heading">{{post.title}}</h4>
+			<p class="list-group-item-text" ng-bind-html="post.content | limitTo:40"></p>
+		</a>
+	</div>
+</div>
