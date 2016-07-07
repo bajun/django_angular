@@ -6,7 +6,7 @@
 </script>
 <div ng-if="post">
 	<div class="page-header">
-	  <h1>{{post.title}} <small>by {{post.author}}</small></h1>
+	  <h1>{{post.title}} <small>by {{post.author_name}}</small></h1>
 	</div>
 	<ul id="postSingle" class="nav nav-tabs" role="tablist"> 
 		<li role="presentation" class="active">
@@ -34,6 +34,7 @@
 					</div>
 					<div class="input-group">
 			            <button type="submit" class="btn btn-default" >Update</button>
+	            		<button type="button" ng-click="delete()" class="btn btn-danger">Delete</button>
 			        </div>
 	        	</form>
 			  </div>

@@ -5,7 +5,7 @@
 		</h3>
 	  <input type="submit" class="btn btn-lg btn-primary" ng-click="logout()" value="Logout?"/>
 	</div>
-	<div ng-hide="key">
+	<div ng-hide="key || user.username">
 	  <form id="id_auth_form" class="" ng-submit="login()">
 	  <div class="form-group">
 	    <input ng-model="username" required name="username" type="text" placeholder="username" class="form-control">
@@ -15,6 +15,8 @@
 	  </div>
 	    <div class="btn-group">
 	    <input type="submit" class="btn btn-default" value="login">
+	    <a type="button" class="btn btn-default" ng-click="fbLogin()">fb</a>
+	    <a type="button" class="btn btn-default" ng-click="twitterLogin()">twitter</a>
 	  </div>
 	  </form>
 	</div>

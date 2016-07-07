@@ -10,11 +10,18 @@ var api_url = "/api/";
         })
         .state('/profile', {
             url: "/profile",
+            params: {
+                action_state: null,
+            },
             templateUrl : 'static/templates/userProfile.html',
             controller : 'profileController',
         })
         .state('/posts', {
             url: "/posts",
+            params: {
+                action_state: null,
+                title: null,
+            },
             templateUrl : 'static/templates/userPosts.html',
             controller : 'itemsController',
         })
@@ -28,11 +35,23 @@ var api_url = "/api/";
             templateUrl : 'static/templates/singlePost.html',
             controller : 'singlepostController',
         })
+        // Social stuff
+        // .state('/fb', {
+        //     url : '/fb',
+        //     controller : 'fbAuthController',
+        // })
         ;
 	    
         $urlRouterProvider.otherwise('/');
 	});
-    
+
+    app.filter('removeHTMLTags', function() {
+        return function(text) {
+            return  text ? String(text).replace(/<[^>]+>/gm, '') : '';
+        };
+    });
+
+    // Show tabs correctly
     app.directive('showtab',
         function () {
             return {
@@ -49,6 +68,11 @@ var api_url = "/api/";
         // angular which cookie to add to what header.
         $httpProvider.defaults.xsrfCookieName = 'csrftoken';
         $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
+        // $httpProvider.defaults.useXDomain = true;
+        // $httpProvider.defaults.headers.common = {};
+        // $httpProvider.defaults.headers.post = {};
+        // $httpProvider.defaults.headers.put = {};
+        // $httpProvider.defaults.headers.patch = {};
     }]).
     factory('api', function($resource,$stateParams){
         return {
@@ -81,7 +105,7 @@ var api_url = "/api/";
             })
         };
     }).
-    controller('homeController', function($scope,$location,$timeout,$http, api) {
+    controller('homeController', function($scope,$location,$timeout,$http,$window, api) {
         $scope.user = api.profile.get_profile_info();
 
         $scope.getCredentials = function(){
@@ -113,8 +137,17 @@ var api_url = "/api/";
                         $('#username-label').append(data.username);
                     })
         };
+        $scope.fbLogin = function(){
+            // todo login facebook            
+        };
+        $scope.twitterLogin = function(){
+            // todo login twitter            
+        };
     }).
-    controller('profileController',function($scope,api){
+    controller('profileController',function($scope,$state,$stateParams,api){
+
+        $scope.state = $stateParams;
+
     	api.profile.get_profile_info().
             $promise.
                 then(function(data){
@@ -142,8 +175,81 @@ var api_url = "/api/";
                 posts : $scope.user.posts
             });
         };
+        $scope.addPost = function($data){
+            var form = $('form[name=postForm]');
+            api.posts.create({
+                title : $scope.newPost.title,
+                content : $scope.newPost.content,
+                author : $scope.newPost.author
+            }).
+                $promise.
+                    then(function($data){
+                        $scope.content  = '';
+                        form.find('label').css('border-bottom','none');
+                        form.find('input,textarea').val('');
+                        form.find('.alert-success')
+                            .fadeIn('slow')
+                            .fadeOut('slow');
+                        $('.table.posts').append(
+                                '<tr>'
+                                +'<td>'+$data.title+'</td>'
+                                +'<td><a href="#/user/'+$data.author+'">'+$data.author_name+'</a></td>'
+                                +'<td>'+$data.content.substring(0, 40)+'</td>'
+                                +'<td>'
+                                +'<a href="#/post/'+$data.id+'/view" class="glyphicon glyphicon-search"></a>'
+                                +'<a href="#/post/'+$data.id+'/delete" class="glyphicon glyphicon-trash"></a>'
+                                +'</td></tr>'
+                            );
+
+                    }).catch(function(data){
+                        form.find('label').css('border-bottom','none');
+
+                        $.each(data.data,function(k,v){
+                            console.log(k);
+                            form.find('label[id='+k+']').css('border-bottom','solid red');
+                        })
+                    });
+        };
+        $scope.addUser = function($data){
+            var form = $('form[name=userForm]');
+            console.log($scope.newUser);
+            api.users.create({
+                username : $scope.newUser.username,
+                email : $scope.newUser.email,
+                first_name : $scope.newUser.first_name,
+                last_name : $scope.newUser.last_name,
+            }).
+                $promise.
+                    then(function($data){
+                        $scope.content  = '';
+                        form.find('label').css('border-bottom','none');
+                        form.find('input,textarea').val('');
+                        form.find('.alert-success')
+                            .fadeIn('slow')
+                            .fadeOut('slow');
+                        $('.table.users').append(
+
+                                '<tr> '
+                                +'<td><a href="#/user/'+$data.id+'">'+$data.username+'</a></td>'
+                                +'<td></td>'
+                                +'<td>'
+                                +'<a href="#/user/'+$data.id+'" class="glyphicon glyphicon-search"></a>'
+                                +'<a href="#/user/'+$data.id+'/delete" class="glyphicon glyphicon-trash"></a>'
+                                +'</td></tr>'
+                            );
+
+                    }).catch(function(data){
+                        form.find('label').css('border-bottom','none');
+
+                        $.each(data.data,function(k,v){
+                            console.log(k);
+                            form.find('label[id='+k+']').css('border-bottom','solid red');
+                        })
+                    });
+        };
     }).
-    controller('itemsController',function($scope,$urlRouter,api){
+    controller('itemsController',function($scope,$stateParams,api){
+        $scope.state = $stateParams;
         api.profile.get_profile_info().
             $promise.
                 then(function(data){
@@ -155,7 +261,7 @@ var api_url = "/api/";
                     $scope.posts = data;
                 });
         $scope.postAuthorFilter = function(item){
-            return item.author == $scope.user.username
+            return item.author_name == $scope.user.username
         }
         $scope.addPost = function($data){
             api.posts.create({
@@ -172,15 +278,40 @@ var api_url = "/api/";
                             .fadeIn('slow')
                             .fadeOut('slow');
                         $('.list-group').append('<a href="#/post/'+$data.id+'/" class="list-group-item">'
-                                +'<h4 class="list-group-item-heading">'+$data.title+'</h4>'
-                                +'<p class="list-group-item-text">'+$data.content.substring(0, 40)+'</p></a>'
-                                );
+                            +'<h4 class="list-group-item-heading">'+$data.title+'</h4>'
+                            +'<p class="list-group-item-text">'+$data.content.substring(0, 40)+'</p></a>'
+                            );
 
                     });
         }
     }).
-    controller('userController',function($scope,$stateParams,api){}).
-    controller('singlepostController',function($scope,$stateParams,api){
+    controller('userController',function($scope,$state,$stateParams,api){
+        // for some reasons this controller is calling two times, first time without param
+        if($stateParams.id){
+            if($stateParams.action == 'delete'){
+                api.user.delete({id:$stateParams.id});
+                $state.go('/profile',{'action_state': 'deleted'}, {location: 'replace'});
+            }
+            else{
+                api.user.detail({id:$stateParams.id}).
+                    $promise.
+                        then(function($data){
+                            console.log($scope);
+                            $scope.user = {'username':$data.username,'first_name':$data.first_name,'last_name':$data.last_name}
+                        });
+            }
+        }
+
+        $scope.updateUser = function($data){
+            api.user.update({id:$stateParams.id},{
+                username : $scope.user.username,
+                first_name : $scope.fname,
+                last_name : $scope.lname,
+            });
+        };
+
+    }).
+    controller('singlepostController',function($scope,$state,$stateParams,api){
         // for some reasons this controller is calling two times, first time without param
         if($stateParams.id){
             if($stateParams.action == 'delete'){
@@ -196,6 +327,10 @@ var api_url = "/api/";
                         });
             }
         }
+        $scope.delete = function(){
+            api.singlepost.delete({id:$stateParams.id});
+            $state.go('/posts',{'title' : $scope.post.title,'action_state': 'deleted'}, {location: 'replace'});
+        };
     }).
     controller('wysiwygeditor', function($scope,$stateParams, api) {
             api.singlepost.detail({id:$stateParams.id}).

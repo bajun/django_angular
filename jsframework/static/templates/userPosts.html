@@ -1,5 +1,4 @@
-<div class="panel panel-default">
-	<div class="add-post-form">
+<div class="add-post-form">
 		<form class="form-horizontal" ng-submit="addPost()" name="postForm">
 			<div class="page-header">
 			  <h2>Post something</h2>
@@ -24,6 +23,8 @@
 			</div>
 		</form>
 	</div>
+<div class="panel panel-default">
+	<div class="alert alert-success" ng-show="state.action_state == 'deleted'" role="alert">Deleted "{{state.title}}"</div>
 	<div class="panel-heading">User posts</div>
 	<div class="list-group">
 	  	<a ui-sref="singlepost({id:{{post.id}}})" class="list-group-item" ng-repeat="post in posts | filter : postAuthorFilter">

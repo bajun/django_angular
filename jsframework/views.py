@@ -12,6 +12,7 @@ from jsframework.serializers import PostSerializer,UserSerializer,UserDetailsSer
 
 
 
+
 #
 class PostViewSet(viewsets.ModelViewSet):
 	"""
@@ -23,7 +24,7 @@ class PostViewSet(viewsets.ModelViewSet):
 	permission_classes = (IsOwnerOrReadOnlyOrAdmin,permissions.IsAuthenticated)
 
 	def perform_create(self, serializer_class):
-		serializer_class.save(author=self.request.user)
+		serializer_class.save(author=User.objects.get(pk=self.request.data['author']))
 
 	def get_queryset(self):
 		user = self.request.user
@@ -51,3 +52,5 @@ class UserViewSet(viewsets.ModelViewSet):
 # Create your views here.
 def index(request):
 	return render(request, 'jsframework/index.html')
+
+
